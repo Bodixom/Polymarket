@@ -3,15 +3,20 @@
 This repo contains data capture, dry-run execution telemetry generation, and a telemetry-calibrated backtest layer.
 
 ## Why calibration exists
-Naive touch-fill assumptions overstate realizable edge. The calibration flow replaces hand-picked constants with observed rates from snapshot-derived telemetry.
+Naive touch-fill assumptions overstate realizable edge. The calibration flow replaces hand-picked constants with measured rates from snapshot-derived telemetry and now separates:
+- **touch observed** (top-of-book crossed our quote),
+- **fill inferred** (touch + persistence + freshness thresholds),
+- **exit opportunity observed** (book later crossed target exit level).
 
 ## Inputs from telemetry
 From `live_test_harness.py --snapshots-csv ...` rows:
-- passive entry fill-opportunity rate,
-- passive exit-opportunity rate (conditional on entry opportunity),
+- passive entry touch frequency,
+- passive entry fill-inferred frequency,
+- passive exit-opportunity frequency (conditional on inferred fill),
+- time-to-touch distribution,
 - hold-time distribution,
-- adverse movement after intended fill,
-- fraction of entries that would require taker exit under strict passive policy.
+- adverse movement after touch/inferred fill,
+- fraction of inferred entries requiring taker exit under strict passive policy.
 
 ## Tier definitions used by `telemetry_calibrated_backtest.py`
 
@@ -33,6 +38,7 @@ From `live_test_harness.py --snapshots-csv ...` rows:
 - True queue-priority placement and partial-fill mechanics.
 - Hidden liquidity and trade-through behavior vs top-of-book touches.
 - Real cancel/replace acknowledgment timing under load.
+- Realized fee tier, rebates, and reject/retry behavior under throttling.
 
 ## Interpretation guidance
 - If only optimistic tier looks positive, strategy is likely not robust.

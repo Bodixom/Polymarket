@@ -49,6 +49,10 @@ class LiveTestHarness:
         adverse_horizon_s: float,
         size: float,
         min_exit_edge: float,
+        min_touch_observations: int,
+        min_touch_persistence_ms: int,
+        max_touch_staleness_s: float,
+        max_touch_btc_staleness_s: float,
     ) -> None:
         self.out_csv = out_csv
         self.dry_run = dry_run
@@ -60,6 +64,10 @@ class LiveTestHarness:
         self.adverse_horizon_s = adverse_horizon_s
         self.size = size
         self.min_exit_edge = min_exit_edge
+        self.min_touch_observations = min_touch_observations
+        self.min_touch_persistence_ms = min_touch_persistence_ms
+        self.max_touch_staleness_s = max_touch_staleness_s
+        self.max_touch_btc_staleness_s = max_touch_btc_staleness_s
         self.stop = False
 
     def _emit(self, event: str, **fields: Any) -> None:
@@ -78,7 +86,15 @@ class LiveTestHarness:
                     row["ts"] = parse_ts(str(row["ts_utc"]))
                 except Exception:
                     continue
-                for key in ["yes_best_bid", "yes_best_ask", "yes_mid", "secs_since_last_market_msg", "secs_since_last_btc_update"]:
+                for key in [
+                    "yes_best_bid",
+                    "yes_best_ask",
+                    "yes_mid",
+                    "secs_since_last_market_msg",
+                    "secs_since_last_btc_update",
+                    "secs_since_last_yes_quote_update",
+                    "secs_since_last_yes_trade_update",
+                ]:
                     val = row.get(key)
                     row[key] = float(val) if val not in (None, "") else None
                 rows.append(row)
@@ -142,6 +158,53 @@ class LiveTestHarness:
         move = (entry_mid - later_mid) / max(entry_mid, 1e-9)
         return round(-move * 10000, 2)
 
+    def _infer_fill_from_touch_window(
+        self,
+        rows: list[dict[str, Any]],
+        quote: QuoteIntent,
+        start_idx: int,
+        deadline_ts: float,
+    ) -> tuple[bool, Optional[int], int, int]:
+        touch_start_idx: Optional[int] = None
+        touch_end_idx: Optional[int] = None
+        touch_count = 0
+
+        j = start_idx
+        while j < len(rows) and rows[j]["slug"] == quote.slug and rows[j]["ts"].timestamp() <= deadline_ts:
+            if self._touches_quote(quote, rows[j]):
+                if touch_start_idx is None:
+                    touch_start_idx = j
+                touch_end_idx = j
+                touch_count += 1
+            elif touch_start_idx is not None:
+                break
+            j += 1
+
+        if touch_start_idx is None or touch_end_idx is None:
+            return False, None, 0, 0
+
+        touch_start_ts = rows[touch_start_idx]["ts"]
+        touch_end_ts = rows[touch_end_idx]["ts"]
+        touch_persistence_ms = max(0, int((touch_end_ts - touch_start_ts).total_seconds() * 1000))
+
+        touch_row = rows[touch_start_idx]
+        quote_staleness = touch_row.get("secs_since_last_yes_quote_update")
+        market_staleness = touch_row.get("secs_since_last_market_msg")
+        btc_staleness = touch_row.get("secs_since_last_btc_update")
+
+        stale_ok = (
+            (quote_staleness is None or quote_staleness <= self.max_touch_staleness_s)
+            and (market_staleness is None or market_staleness <= self.max_touch_staleness_s)
+            and (btc_staleness is None or btc_staleness <= self.max_touch_btc_staleness_s)
+        )
+
+        fill_inferred = (
+            touch_count >= self.min_touch_observations
+            and touch_persistence_ms >= self.min_touch_persistence_ms
+            and stale_ok
+        )
+        return fill_inferred, touch_start_idx, touch_count, touch_persistence_ms
+
     def run_snapshot_mode(self) -> None:
         rows = self._load_snapshots()
         if not rows:
@@ -149,8 +212,11 @@ class LiveTestHarness:
 
         fieldnames = [
             "quote_id", "quote_ts_utc", "slug", "quote_side", "quote_price", "quote_size", "mode",
+            "touch_observed", "touch_observed_ts_utc", "touch_observation_count", "touch_persistence_ms",
+            "fill_inferred", "fill_inferred_ts_utc", "fill_confidence",
             "fill_opportunity", "fill_opportunity_ts_utc", "time_to_touch_ms", "cancel_ts_utc", "cancel_after_ms",
-            "entry_mid", "intended_exit_price", "passive_exit_opportunity", "passive_exit_ts_utc", "hold_ms",
+            "entry_mid", "intended_exit_price", "exit_opportunity_observed", "exit_opportunity_ts_utc",
+            "passive_exit_opportunity", "passive_exit_ts_utc", "hold_ms",
             "forced_taker_exit", "maker_taker_path", "adverse_move_bps_post_fill",
             "quote_staleness_s", "btc_staleness_s",
         ]
@@ -172,25 +238,22 @@ class LiveTestHarness:
 
                 quote_ts = parse_ts(quote.quote_ts_utc)
                 fill_deadline = quote_ts.timestamp() + self.quote_ttl_s
-                fill_found_idx: Optional[int] = None
-
-                j = i
-                while j < len(rows) and rows[j]["slug"] == quote.slug and rows[j]["ts"].timestamp() <= fill_deadline:
-                    if self._touches_quote(quote, rows[j]):
-                        fill_found_idx = j
-                        break
-                    j += 1
-
-                fill_opportunity = fill_found_idx is not None
-                fill_ts: Optional[datetime] = rows[fill_found_idx]["ts"] if fill_found_idx is not None else None
-                cancel_ts = quote_ts if fill_opportunity else datetime.fromtimestamp(fill_deadline, tz=timezone.utc)
-                cancel_after_ms = 0 if fill_opportunity else int(self.quote_ttl_s * 1000)
-                time_to_touch_ms = (
-                    int((fill_ts - quote_ts).total_seconds() * 1000)
-                    if fill_ts is not None else None
+                fill_inferred, first_touch_idx, touch_count, touch_persistence_ms = self._infer_fill_from_touch_window(
+                    rows=rows,
+                    quote=quote,
+                    start_idx=i,
+                    deadline_ts=fill_deadline,
                 )
 
-                passive_exit_opportunity: Optional[bool] = None
+                touch_observed = first_touch_idx is not None
+                touch_ts: Optional[datetime] = rows[first_touch_idx]["ts"] if first_touch_idx is not None else None
+                fill_ts: Optional[datetime] = touch_ts if fill_inferred and touch_ts is not None else None
+
+                cancel_ts = quote_ts if fill_inferred else datetime.fromtimestamp(fill_deadline, tz=timezone.utc)
+                cancel_after_ms = 0 if fill_inferred else int(self.quote_ttl_s * 1000)
+                time_to_touch_ms = int((touch_ts - quote_ts).total_seconds() * 1000) if touch_ts is not None else None
+
+                exit_observed: Optional[bool] = None
                 passive_exit_ts: Optional[datetime] = None
                 forced_taker_exit: Optional[bool] = None
                 hold_ms: Optional[int] = None
@@ -199,24 +262,24 @@ class LiveTestHarness:
                 entry_mid = self._mid(row)
                 intended_exit_price: Optional[float] = None
 
-                if fill_opportunity and fill_found_idx is not None:
-                    fill_row = rows[fill_found_idx]
+                if fill_inferred and first_touch_idx is not None:
+                    fill_row = rows[first_touch_idx]
                     entry_mid = self._mid(fill_row)
                     intended_exit_price = (
                         quote.price + self.min_exit_edge if quote.side == "buy" else quote.price - self.min_exit_edge
                     )
                     exit_deadline = fill_row["ts"].timestamp() + self.max_hold_s
 
-                    k = fill_found_idx
+                    k = first_touch_idx
                     while k < len(rows) and rows[k]["slug"] == quote.slug and rows[k]["ts"].timestamp() <= exit_deadline:
                         if self._touches_exit(quote.side, intended_exit_price, rows[k]):
-                            passive_exit_opportunity = True
+                            exit_observed = True
                             passive_exit_ts = rows[k]["ts"]
                             break
                         k += 1
 
-                    if passive_exit_opportunity is not True:
-                        passive_exit_opportunity = False
+                    if exit_observed is not True:
+                        exit_observed = False
                         forced_taker_exit = True
                         hold_ms = int(self.max_hold_s * 1000)
                         path = "maker_entry_taker_exit"
@@ -226,9 +289,11 @@ class LiveTestHarness:
                         path = "maker_entry_maker_exit"
 
                     adverse_ts = fill_row["ts"].timestamp() + self.adverse_horizon_s
-                    adv_idx = self._find_index_at_or_after(rows, fill_found_idx, datetime.fromtimestamp(adverse_ts, tz=timezone.utc))
+                    adv_idx = self._find_index_at_or_after(rows, first_touch_idx, datetime.fromtimestamp(adverse_ts, tz=timezone.utc))
                     later_mid = self._mid(rows[adv_idx]) if adv_idx < len(rows) and rows[adv_idx]["slug"] == quote.slug else None
                     adverse_bps = self._adverse_bps(quote.side, entry_mid, later_mid)
+
+                fill_confidence = "high" if fill_inferred else ("low" if touch_observed else "none")
 
                 out_row = {
                     "quote_id": quote.quote_id,
@@ -238,14 +303,23 @@ class LiveTestHarness:
                     "quote_price": round(quote.price, 6),
                     "quote_size": quote.size,
                     "mode": "dry_run_observed",
-                    "fill_opportunity": fill_opportunity,
+                    "touch_observed": touch_observed,
+                    "touch_observed_ts_utc": touch_ts.isoformat(timespec="milliseconds") if touch_ts else None,
+                    "touch_observation_count": touch_count if touch_observed else 0,
+                    "touch_persistence_ms": touch_persistence_ms if touch_observed else 0,
+                    "fill_inferred": fill_inferred,
+                    "fill_inferred_ts_utc": fill_ts.isoformat(timespec="milliseconds") if fill_ts else None,
+                    "fill_confidence": fill_confidence,
+                    "fill_opportunity": fill_inferred,
                     "fill_opportunity_ts_utc": fill_ts.isoformat(timespec="milliseconds") if fill_ts else None,
                     "time_to_touch_ms": time_to_touch_ms,
                     "cancel_ts_utc": cancel_ts.isoformat(timespec="milliseconds"),
                     "cancel_after_ms": cancel_after_ms,
                     "entry_mid": entry_mid,
                     "intended_exit_price": intended_exit_price,
-                    "passive_exit_opportunity": passive_exit_opportunity,
+                    "exit_opportunity_observed": exit_observed,
+                    "exit_opportunity_ts_utc": passive_exit_ts.isoformat(timespec="milliseconds") if passive_exit_ts else None,
+                    "passive_exit_opportunity": exit_observed,
                     "passive_exit_ts_utc": passive_exit_ts.isoformat(timespec="milliseconds") if passive_exit_ts else None,
                     "hold_ms": hold_ms,
                     "forced_taker_exit": forced_taker_exit,
@@ -259,16 +333,17 @@ class LiveTestHarness:
 
             f.flush()
 
-        # Print quick summary as stdout diagnostic JSON
         with open(self.out_csv, "r", encoding="utf-8") as f:
             r = list(csv.DictReader(f))
-        fills = [x for x in r if x["fill_opportunity"] == "True"]
-        exits = [x for x in fills if x["passive_exit_opportunity"] == "True"]
+        touches = [x for x in r if x["touch_observed"] == "True"]
+        fills = [x for x in r if x["fill_inferred"] == "True"]
+        exits = [x for x in fills if x["exit_opportunity_observed"] == "True"]
         adverse = [float(x["adverse_move_bps_post_fill"]) for x in fills if x["adverse_move_bps_post_fill"] not in ("", "None")]
         self._emit(
             "harness_summary",
             total_quotes=len(r),
-            fill_opportunity_rate=(len(fills) / len(r)) if r else 0.0,
+            touch_observed_rate=(len(touches) / len(r)) if r else 0.0,
+            fill_inferred_rate=(len(fills) / len(r)) if r else 0.0,
             passive_exit_rate_given_fill=(len(exits) / len(fills)) if fills else 0.0,
             mean_adverse_bps=(mean(adverse) if adverse else None),
         )
@@ -277,8 +352,11 @@ class LiveTestHarness:
         """Legacy synthetic fallback mode (still dry-run only)."""
         fieldnames = [
             "quote_id", "quote_ts_utc", "slug", "quote_side", "quote_price", "quote_size", "mode",
+            "touch_observed", "touch_observed_ts_utc", "touch_observation_count", "touch_persistence_ms",
+            "fill_inferred", "fill_inferred_ts_utc", "fill_confidence",
             "fill_opportunity", "fill_opportunity_ts_utc", "time_to_touch_ms", "cancel_ts_utc", "cancel_after_ms",
-            "entry_mid", "intended_exit_price", "passive_exit_opportunity", "passive_exit_ts_utc", "hold_ms",
+            "entry_mid", "intended_exit_price", "exit_opportunity_observed", "exit_opportunity_ts_utc",
+            "passive_exit_opportunity", "passive_exit_ts_utc", "hold_ms",
             "forced_taker_exit", "maker_taker_path", "adverse_move_bps_post_fill", "quote_staleness_s", "btc_staleness_s",
         ]
         with open(self.out_csv, "w", newline="", encoding="utf-8") as f:
@@ -295,6 +373,13 @@ class LiveTestHarness:
                     "quote_price": 0.5,
                     "quote_size": self.size,
                     "mode": "dry_run_synthetic",
+                    "touch_observed": False,
+                    "touch_observed_ts_utc": None,
+                    "touch_observation_count": 0,
+                    "touch_persistence_ms": 0,
+                    "fill_inferred": False,
+                    "fill_inferred_ts_utc": None,
+                    "fill_confidence": "none",
                     "fill_opportunity": False,
                     "fill_opportunity_ts_utc": None,
                     "time_to_touch_ms": None,
@@ -302,6 +387,8 @@ class LiveTestHarness:
                     "cancel_after_ms": int(self.quote_ttl_s * 1000),
                     "entry_mid": 0.5,
                     "intended_exit_price": 0.51,
+                    "exit_opportunity_observed": None,
+                    "exit_opportunity_ts_utc": None,
                     "passive_exit_opportunity": None,
                     "passive_exit_ts_utc": None,
                     "hold_ms": None,
@@ -336,6 +423,10 @@ def main() -> int:
     parser.add_argument("--adverse-horizon-s", type=float, default=2.0, help="Seconds after fill for adverse movement measurement")
     parser.add_argument("--size", type=float, default=1.0, help="Diagnostic quote size")
     parser.add_argument("--min-exit-edge", type=float, default=0.01, help="Exit edge in price units")
+    parser.add_argument("--min-touch-observations", type=int, default=2, help="Minimum touched snapshots before inferring fill")
+    parser.add_argument("--min-touch-persistence-ms", type=int, default=300, help="Minimum continuous touch window to infer fill")
+    parser.add_argument("--max-touch-staleness-s", type=float, default=0.6, help="Maximum quote/market staleness allowed for inferred fill")
+    parser.add_argument("--max-touch-btc-staleness-s", type=float, default=2.0, help="Maximum BTC staleness allowed for inferred fill")
     parser.add_argument("--dry-run", action="store_true", default=True, help="Diagnostics only. Real execution disabled by design")
     args = parser.parse_args()
 
@@ -350,6 +441,10 @@ def main() -> int:
         adverse_horizon_s=args.adverse_horizon_s,
         size=args.size,
         min_exit_edge=args.min_exit_edge,
+        min_touch_observations=args.min_touch_observations,
+        min_touch_persistence_ms=args.min_touch_persistence_ms,
+        max_touch_staleness_s=args.max_touch_staleness_s,
+        max_touch_btc_staleness_s=args.max_touch_btc_staleness_s,
     )
 
     def _stop(*_args: Any) -> None:
