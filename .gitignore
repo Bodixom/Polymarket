@@ -1,0 +1,5 @@
+.idea/
+.venv/
+snapshots.csv
+data/*smoke*
+data/*.stdout.log

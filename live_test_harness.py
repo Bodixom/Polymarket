@@ -325,7 +325,7 @@ class LiveTestHarness:
                     "forced_taker_exit": forced_taker_exit,
                     "maker_taker_path": path,
                     "adverse_move_bps_post_fill": adverse_bps,
-                    "quote_staleness_s": row.get("secs_since_last_market_msg"),
+                    "quote_staleness_s": row.get("secs_since_last_yes_quote_update"),
                     "btc_staleness_s": row.get("secs_since_last_btc_update"),
                 }
                 writer.writerow(out_row)

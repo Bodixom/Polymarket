@@ -14,7 +14,7 @@ From `live_test_harness.py --snapshots-csv ...` rows:
 - passive entry fill-inferred frequency,
 - passive exit-opportunity frequency (conditional on inferred fill),
 - time-to-touch distribution,
-- hold-time distribution,
+- hold-time distribution for successful passive exits,
 - adverse movement after touch/inferred fill,
 - fraction of inferred entries requiring taker exit under strict passive policy.
 

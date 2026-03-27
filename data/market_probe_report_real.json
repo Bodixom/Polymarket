@@ -1,0 +1,109 @@
+{
+  "markets": [
+    {
+      "slug": "btc-updown-5m-1774588200",
+      "quality_score": 83.95762907418992,
+      "sample_quotes": 981,
+      "passive_entry_touch_freq": 0.3598369011213048,
+      "passive_entry_fill_inferred_freq": 0.2782874617737003,
+      "passive_exit_opportunity_freq_given_fill": 0.34798534798534797,
+      "forced_taker_exit_frac_given_fill": 0.652014652014652,
+      "time_to_touch_median_ms": 606.0,
+      "hold_median_ms": 2794.0,
+      "adverse_mean_bps": 184.2556043956044,
+      "ev_bps_per_quote": -47.16185524974515,
+      "maker_only_completion_prob": 0.09683995922528031,
+      "estimated_forced_taker_rate": 0.18144750254841996,
+      "recommendation": "monitor"
+    },
+    {
+      "slug": "btc-updown-5m-1774589100",
+      "quality_score": 83.16945730996558,
+      "sample_quotes": 801,
+      "passive_entry_touch_freq": 0.33707865168539325,
+      "passive_entry_fill_inferred_freq": 0.2571785268414482,
+      "passive_exit_opportunity_freq_given_fill": 0.3446601941747573,
+      "forced_taker_exit_frac_given_fill": 0.6553398058252428,
+      "time_to_touch_median_ms": 800.0,
+      "hold_median_ms": 3394.0,
+      "adverse_mean_bps": 186.84910891089112,
+      "ev_bps_per_quote": -44.2583226412529,
+      "maker_only_completion_prob": 0.08863920099875157,
+      "estimated_forced_taker_rate": 0.16853932584269662,
+      "recommendation": "monitor"
+    },
+    {
+      "slug": "btc-updown-5m-1774588800",
+      "quality_score": 82.65823099739364,
+      "sample_quotes": 1494,
+      "passive_entry_touch_freq": 0.214190093708166,
+      "passive_entry_fill_inferred_freq": 0.1606425702811245,
+      "passive_exit_opportunity_freq_given_fill": 0.25833333333333336,
+      "forced_taker_exit_frac_given_fill": 0.7416666666666667,
+      "time_to_touch_median_ms": 799.0,
+      "hold_median_ms": 3292.0,
+      "adverse_mean_bps": 355.4771666666667,
+      "ev_bps_per_quote": -54.84506024096386,
+      "maker_only_completion_prob": 0.041499330655957165,
+      "estimated_forced_taker_rate": 0.11914323962516735,
+      "recommendation": "ignore"
+    },
+    {
+      "slug": "btc-updown-5m-1774588500",
+      "quality_score": 81.64526358645315,
+      "sample_quotes": 1494,
+      "passive_entry_touch_freq": 0.46586345381526106,
+      "passive_entry_fill_inferred_freq": 0.3467202141900937,
+      "passive_exit_opportunity_freq_given_fill": 0.47297297297297297,
+      "forced_taker_exit_frac_given_fill": 0.527027027027027,
+      "time_to_touch_median_ms": 610.0,
+      "hold_median_ms": 3006.0,
+      "adverse_mean_bps": 325.92005825242717,
+      "ev_bps_per_quote": -107.53051551188571,
+      "maker_only_completion_prob": 0.16398929049531458,
+      "estimated_forced_taker_rate": 0.18273092369477908,
+      "recommendation": "ignore"
+    }
+  ],
+  "global": {
+    "sample_quotes": 4770,
+    "passive_entry_touch_freq": 0.3436058700209644,
+    "passive_entry_fill_inferred_freq": 0.2593291404612159,
+    "passive_exit_opportunity_freq_given_fill": 0.38237671786580435,
+    "forced_taker_exit_frac_given_fill": 0.6176232821341956,
+    "time_to_touch_ms": {
+      "median": 788.0,
+      "p90": 1604.0,
+      "p95": 1801.0
+    },
+    "hold_ms": {
+      "median": 3007.0,
+      "p90": 6600.0,
+      "p95": 6999.0
+    },
+    "adverse_bps_after_touch_or_fill": {
+      "mean": 277.40540650406507,
+      "p95": 2222.22
+    }
+  },
+  "global_scenarios": {
+    "optimistic_upper_bound": {
+      "ev_bps_per_quote": -67.55627837432463,
+      "maker_only_completion_prob": 0.11998532494758912,
+      "estimated_forced_taker_rate": 0.16527672955974843,
+      "estimated_filled_rate": 0.28526205450733755
+    },
+    "telemetry_calibrated_estimate": {
+      "ev_bps_per_quote": -68.03406453784665,
+      "maker_only_completion_prob": 0.0991614255765199,
+      "estimated_forced_taker_rate": 0.160167714884696,
+      "estimated_filled_rate": 0.2593291404612159
+    },
+    "hard_conservative_lower_bound": {
+      "ev_bps_per_quote": -70.40903833239591,
+      "maker_only_completion_prob": 0.05577830188679244,
+      "estimated_forced_taker_rate": 0.13871855345911951,
+      "estimated_filled_rate": 0.19449685534591193
+    }
+  }
+}

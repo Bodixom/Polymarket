@@ -1,0 +1,459 @@
+{
+  "relationship": {
+    "global": {
+      "sample_rows": 4770,
+      "corr_yes_mid_cents_vs_btc_delta_from_open_bps": 0.9200810714188795,
+      "r2": 0.8465491779833133,
+      "slope_yes_mid_cents_per_btc_bps": 3.2159749997406353
+    },
+    "per_market": {
+      "btc-updown-5m-1774588200": {
+        "sample_rows": 981,
+        "corr_yes_mid_cents_vs_btc_delta_from_open_bps": 0.9567240139682103,
+        "r2": 0.9153208389034442,
+        "slope_yes_mid_cents_per_btc_bps": 4.0044003327256785,
+        "anchor_btc_price": 68680.82,
+        "yes_mid_cents_min": 29.5,
+        "yes_mid_cents_max": 99.5
+      },
+      "btc-updown-5m-1774588500": {
+        "sample_rows": 1494,
+        "corr_yes_mid_cents_vs_btc_delta_from_open_bps": 0.8771758827892487,
+        "r2": 0.7694375293470979,
+        "slope_yes_mid_cents_per_btc_bps": 4.33728483390155,
+        "anchor_btc_price": 68767.22780988688,
+        "yes_mid_cents_min": 0.5,
+        "yes_mid_cents_max": 64.5
+      },
+      "btc-updown-5m-1774588800": {
+        "sample_rows": 1494,
+        "corr_yes_mid_cents_vs_btc_delta_from_open_bps": 0.9358199541209405,
+        "r2": 0.8757589865309192,
+        "slope_yes_mid_cents_per_btc_bps": 3.239014829596247,
+        "anchor_btc_price": 68750.36005,
+        "yes_mid_cents_min": 0.05,
+        "yes_mid_cents_max": 41.0
+      },
+      "btc-updown-5m-1774589100": {
+        "sample_rows": 801,
+        "corr_yes_mid_cents_vs_btc_delta_from_open_bps": 0.9538230409185655,
+        "r2": 0.9097783933871395,
+        "slope_yes_mid_cents_per_btc_bps": 2.3702016178506327,
+        "anchor_btc_price": 68641.13216,
+        "yes_mid_cents_min": 5.5,
+        "yes_mid_cents_max": 42.5
+      }
+    }
+  },
+  "lag_event_studies": {
+    "p90_abs_1s_btc_move": {
+      "event_count": 330,
+      "lookback_seconds": 1.0,
+      "btc_move_threshold_bps": 0.4622369624552957,
+      "pm_underreaction_cents": 0.5,
+      "horizons": {
+        "1_steps": {
+          "seconds": 0.2,
+          "mean_signed_catchup_cents": 0.039545454545454654,
+          "median_signed_catchup_cents": -0.0,
+          "positive_catchup_fraction": 0.10303030303030303
+        },
+        "2_steps": {
+          "seconds": 0.4,
+          "mean_signed_catchup_cents": 0.048787878787878956,
+          "median_signed_catchup_cents": 0.0,
+          "positive_catchup_fraction": 0.14545454545454545
+        },
+        "3_steps": {
+          "seconds": 0.6000000000000001,
+          "mean_signed_catchup_cents": 0.07454545454545473,
+          "median_signed_catchup_cents": -0.0,
+          "positive_catchup_fraction": 0.18787878787878787
+        },
+        "5_steps": {
+          "seconds": 1.0,
+          "mean_signed_catchup_cents": 0.07151515151515163,
+          "median_signed_catchup_cents": -0.0,
+          "positive_catchup_fraction": 0.22424242424242424
+        },
+        "8_steps": {
+          "seconds": 1.6,
+          "mean_signed_catchup_cents": 0.2139393939393944,
+          "median_signed_catchup_cents": 0.0,
+          "positive_catchup_fraction": 0.296969696969697
+        },
+        "10_steps": {
+          "seconds": 2.0,
+          "mean_signed_catchup_cents": 0.21242424242424301,
+          "median_signed_catchup_cents": 0.0,
+          "positive_catchup_fraction": 0.3181818181818182
+        }
+      },
+      "estimated_lag_seconds_from_max_mean_catchup": 1.6
+    },
+    "p95_abs_1s_btc_move": {
+      "event_count": 158,
+      "lookback_seconds": 1.0,
+      "btc_move_threshold_bps": 0.7519018083180152,
+      "pm_underreaction_cents": 0.5,
+      "horizons": {
+        "1_steps": {
+          "seconds": 0.2,
+          "mean_signed_catchup_cents": 0.0572784810126582,
+          "median_signed_catchup_cents": 0.0,
+          "positive_catchup_fraction": 0.11392405063291139
+        },
+        "2_steps": {
+          "seconds": 0.4,
+          "mean_signed_catchup_cents": 0.06075949367088605,
+          "median_signed_catchup_cents": -0.0,
+          "positive_catchup_fraction": 0.17088607594936708
+        },
+        "3_steps": {
+          "seconds": 0.6000000000000001,
+          "mean_signed_catchup_cents": 0.06392405063291143,
+          "median_signed_catchup_cents": -0.0,
+          "positive_catchup_fraction": 0.18354430379746836
+        },
+        "5_steps": {
+          "seconds": 1.0,
+          "mean_signed_catchup_cents": 0.07025316455696201,
+          "median_signed_catchup_cents": -0.0,
+          "positive_catchup_fraction": 0.22784810126582278
+        },
+        "8_steps": {
+          "seconds": 1.6,
+          "mean_signed_catchup_cents": 0.2348101265822789,
+          "median_signed_catchup_cents": 0.0,
+          "positive_catchup_fraction": 0.3291139240506329
+        },
+        "10_steps": {
+          "seconds": 2.0,
+          "mean_signed_catchup_cents": 0.20949367088607643,
+          "median_signed_catchup_cents": 0.0,
+          "positive_catchup_fraction": 0.34177215189873417
+        }
+      },
+      "estimated_lag_seconds_from_max_mean_catchup": 1.6
+    },
+    "p99_abs_1s_btc_move": {
+      "event_count": 25,
+      "lookback_seconds": 1.0,
+      "btc_move_threshold_bps": 1.8062332427987478,
+      "pm_underreaction_cents": 0.5,
+      "horizons": {
+        "1_steps": {
+          "seconds": 0.2,
+          "mean_signed_catchup_cents": 0.3999999999999999,
+          "median_signed_catchup_cents": 0.0,
+          "positive_catchup_fraction": 0.32
+        },
+        "2_steps": {
+          "seconds": 0.4,
+          "mean_signed_catchup_cents": 0.52,
+          "median_signed_catchup_cents": 0.5000000000000004,
+          "positive_catchup_fraction": 0.52
+        },
+        "3_steps": {
+          "seconds": 0.6000000000000001,
+          "mean_signed_catchup_cents": 0.6200000000000001,
+          "median_signed_catchup_cents": 0.5000000000000004,
+          "positive_catchup_fraction": 0.6
+        },
+        "5_steps": {
+          "seconds": 1.0,
+          "mean_signed_catchup_cents": 0.9400000000000004,
+          "median_signed_catchup_cents": 1.0000000000000009,
+          "positive_catchup_fraction": 0.6
+        },
+        "8_steps": {
+          "seconds": 1.6,
+          "mean_signed_catchup_cents": 1.2400000000000007,
+          "median_signed_catchup_cents": 1.0000000000000009,
+          "positive_catchup_fraction": 0.6
+        },
+        "10_steps": {
+          "seconds": 2.0,
+          "mean_signed_catchup_cents": 1.280000000000001,
+          "median_signed_catchup_cents": 1.0000000000000009,
+          "positive_catchup_fraction": 0.52
+        }
+      },
+      "estimated_lag_seconds_from_max_mean_catchup": 2.0
+    }
+  },
+  "strategy_comparison": {
+    "taker_taker": {
+      "tested": [
+        {
+          "config": {
+            "lookback_seconds": 0.4,
+            "btc_move_threshold_bps": 0.3,
+            "pm_underreaction_cents": 0.5,
+            "hold_seconds": 2.0
+          },
+          "trade_count": 102,
+          "win_rate": 0.16666666666666666,
+          "mean_gross_cents": -0.815686274509804,
+          "mean_net_cents": -0.9066541176470589,
+          "median_net_cents": -1.061600000000001,
+          "mean_net_bps_of_notional": -90.6654117647059
+        },
+        {
+          "config": {
+            "lookback_seconds": 0.6000000000000001,
+            "btc_move_threshold_bps": 0.5,
+            "pm_underreaction_cents": 1.0,
+            "hold_seconds": 2.0
+          },
+          "trade_count": 68,
+          "win_rate": 0.17647058823529413,
+          "mean_gross_cents": -0.7794117647058825,
+          "mean_net_cents": -0.8704541176470589,
+          "median_net_cents": -1.061600000000001,
+          "mean_net_bps_of_notional": -87.04541176470589
+        },
+        {
+          "config": {
+            "lookback_seconds": 1.0,
+            "btc_move_threshold_bps": 1.0,
+            "pm_underreaction_cents": 0.5,
+            "hold_seconds": 2.0
+          },
+          "trade_count": 26,
+          "win_rate": 0.23076923076923078,
+          "mean_gross_cents": -0.465384615384616,
+          "mean_net_cents": -0.5628584615384622,
+          "median_net_cents": -0.2599200000000001,
+          "mean_net_bps_of_notional": -56.28584615384622
+        },
+        {
+          "config": {
+            "lookback_seconds": 1.0,
+            "btc_move_threshold_bps": 1.5,
+            "pm_underreaction_cents": 0.5,
+            "hold_seconds": 2.0
+          },
+          "trade_count": 11,
+          "win_rate": 0.36363636363636365,
+          "mean_gross_cents": 0.2727272727272721,
+          "mean_net_cents": 0.16530909090909027,
+          "median_net_cents": -0.11199999999999999,
+          "mean_net_bps_of_notional": 16.530909090909027
+        },
+        {
+          "config": {
+            "lookback_seconds": 1.0,
+            "btc_move_threshold_bps": 0.75,
+            "pm_underreaction_cents": 1.0,
+            "hold_seconds": 1.0
+          },
+          "trade_count": 45,
+          "win_rate": 0.13333333333333333,
+          "mean_gross_cents": -1.0444444444444447,
+          "mean_net_cents": -1.1485973333333337,
+          "median_net_cents": -1.1192000000000009,
+          "mean_net_bps_of_notional": -114.85973333333337
+        }
+      ],
+      "best_any_sample": {
+        "config": {
+          "lookback_seconds": 1.0,
+          "btc_move_threshold_bps": 1.5,
+          "pm_underreaction_cents": 0.5,
+          "hold_seconds": 2.0
+        },
+        "trade_count": 11,
+        "win_rate": 0.36363636363636365,
+        "mean_gross_cents": 0.2727272727272721,
+        "mean_net_cents": 0.16530909090909027,
+        "median_net_cents": -0.11199999999999999,
+        "mean_net_bps_of_notional": 16.530909090909027
+      },
+      "best_min_10_trades": {
+        "config": {
+          "lookback_seconds": 1.0,
+          "btc_move_threshold_bps": 1.5,
+          "pm_underreaction_cents": 0.5,
+          "hold_seconds": 2.0
+        },
+        "trade_count": 11,
+        "win_rate": 0.36363636363636365,
+        "mean_gross_cents": 0.2727272727272721,
+        "mean_net_cents": 0.16530909090909027,
+        "median_net_cents": -0.11199999999999999,
+        "mean_net_bps_of_notional": 16.530909090909027
+      },
+      "best_min_25_trades": {
+        "config": {
+          "lookback_seconds": 1.0,
+          "btc_move_threshold_bps": 1.0,
+          "pm_underreaction_cents": 0.5,
+          "hold_seconds": 2.0
+        },
+        "trade_count": 26,
+        "win_rate": 0.23076923076923078,
+        "mean_gross_cents": -0.465384615384616,
+        "mean_net_cents": -0.5628584615384622,
+        "median_net_cents": -0.2599200000000001,
+        "mean_net_bps_of_notional": -56.28584615384622
+      }
+    },
+    "maker_taker_hybrid": {
+      "tested": [
+        {
+          "config": {
+            "lookback_seconds": 0.4,
+            "btc_move_threshold_bps": 0.3,
+            "pm_underreaction_cents": 0.5,
+            "hold_seconds": 2.0,
+            "maker_ttl_seconds": 2.0
+          },
+          "signal_count": 102,
+          "fill_count": 23,
+          "fill_rate": 0.22549019607843138,
+          "mean_net_cents_per_signal": -0.3705333333333332,
+          "mean_net_bps_of_notional_per_signal": -37.05333333333332,
+          "mean_net_cents_per_fill": -1.6432347826086953,
+          "mean_net_bps_of_notional_per_fill": -164.32347826086954
+        },
+        {
+          "config": {
+            "lookback_seconds": 0.6000000000000001,
+            "btc_move_threshold_bps": 0.5,
+            "pm_underreaction_cents": 1.0,
+            "hold_seconds": 2.0,
+            "maker_ttl_seconds": 2.0
+          },
+          "signal_count": 68,
+          "fill_count": 11,
+          "fill_rate": 0.16176470588235295,
+          "mean_net_cents_per_signal": -0.43204705882352945,
+          "mean_net_bps_of_notional_per_signal": -43.20470588235295,
+          "mean_net_cents_per_fill": -2.6708363636363637,
+          "mean_net_bps_of_notional_per_fill": -267.08363636363634
+        },
+        {
+          "config": {
+            "lookback_seconds": 1.0,
+            "btc_move_threshold_bps": 1.0,
+            "pm_underreaction_cents": 0.5,
+            "hold_seconds": 2.0,
+            "maker_ttl_seconds": 2.0
+          },
+          "signal_count": 26,
+          "fill_count": 7,
+          "fill_rate": 0.2692307692307692,
+          "mean_net_cents_per_signal": -0.6647384615384616,
+          "mean_net_bps_of_notional_per_signal": -66.47384615384617,
+          "mean_net_cents_per_fill": -2.469028571428572,
+          "mean_net_bps_of_notional_per_fill": -246.9028571428572
+        },
+        {
+          "config": {
+            "lookback_seconds": 1.0,
+            "btc_move_threshold_bps": 1.5,
+            "pm_underreaction_cents": 0.5,
+            "hold_seconds": 2.0,
+            "maker_ttl_seconds": 2.0
+          },
+          "signal_count": 11,
+          "fill_count": 2,
+          "fill_rate": 0.18181818181818182,
+          "mean_net_cents_per_signal": -0.461018181818181,
+          "mean_net_bps_of_notional_per_signal": -46.101818181818096,
+          "mean_net_cents_per_fill": -2.535599999999995,
+          "mean_net_bps_of_notional_per_fill": -253.55999999999952
+        },
+        {
+          "config": {
+            "lookback_seconds": 1.0,
+            "btc_move_threshold_bps": 0.75,
+            "pm_underreaction_cents": 1.0,
+            "hold_seconds": 1.0,
+            "maker_ttl_seconds": 2.0
+          },
+          "signal_count": 45,
+          "fill_count": 9,
+          "fill_rate": 0.2,
+          "mean_net_cents_per_signal": -0.2974577777777777,
+          "mean_net_bps_of_notional_per_signal": -29.74577777777777,
+          "mean_net_cents_per_fill": -1.4872888888888887,
+          "mean_net_bps_of_notional_per_fill": -148.72888888888886
+        }
+      ],
+      "best_any_sample": {
+        "config": {
+          "lookback_seconds": 1.0,
+          "btc_move_threshold_bps": 0.75,
+          "pm_underreaction_cents": 1.0,
+          "hold_seconds": 1.0,
+          "maker_ttl_seconds": 2.0
+        },
+        "signal_count": 45,
+        "fill_count": 9,
+        "fill_rate": 0.2,
+        "mean_net_cents_per_signal": -0.2974577777777777,
+        "mean_net_bps_of_notional_per_signal": -29.74577777777777,
+        "mean_net_cents_per_fill": -1.4872888888888887,
+        "mean_net_bps_of_notional_per_fill": -148.72888888888886
+      },
+      "best_min_25_signals": {
+        "config": {
+          "lookback_seconds": 1.0,
+          "btc_move_threshold_bps": 0.75,
+          "pm_underreaction_cents": 1.0,
+          "hold_seconds": 1.0,
+          "maker_ttl_seconds": 2.0
+        },
+        "signal_count": 45,
+        "fill_count": 9,
+        "fill_rate": 0.2,
+        "mean_net_cents_per_signal": -0.2974577777777777,
+        "mean_net_bps_of_notional_per_signal": -29.74577777777777,
+        "mean_net_cents_per_fill": -1.4872888888888887,
+        "mean_net_bps_of_notional_per_fill": -148.72888888888886
+      }
+    }
+  },
+  "maker_safety_by_volatility": {
+    "btc_1s_abs_move_bps_quartiles": {
+      "q25": 0.0004364410415180008,
+      "q75": 0.1568495897126779
+    },
+    "buckets": {
+      "low_volatility": {
+        "quotes": 1186,
+        "fill_rate": 0.28583473861720066,
+        "passive_exit_given_fill": 0.40412979351032446,
+        "forced_taker_given_fill": 0.5958702064896755,
+        "mean_adverse_bps_post_fill": 287.2947774480712
+      },
+      "mid_volatility": {
+        "quotes": 2374,
+        "fill_rate": 0.2468407750631845,
+        "passive_exit_given_fill": 0.4197952218430034,
+        "forced_taker_given_fill": 0.5802047781569966,
+        "mean_adverse_bps_post_fill": 238.27770547945204
+      },
+      "high_volatility": {
+        "quotes": 1190,
+        "fill_rate": 0.2596638655462185,
+        "passive_exit_given_fill": 0.2912621359223301,
+        "forced_taker_given_fill": 0.7087378640776699,
+        "mean_adverse_bps_post_fill": 335.2653594771242
+      },
+      "low_volatility_tight_spread": {
+        "quotes": 541,
+        "fill_rate": 0.20147874306839186,
+        "passive_exit_given_fill": 0.29357798165137616,
+        "forced_taker_given_fill": 0.7064220183486238,
+        "mean_adverse_bps_post_fill": 400.5451401869159
+      }
+    }
+  },
+  "interpretation": {
+    "directional_edge_exists": true,
+    "hybrid_beats_pure_maker_negative_68bps": true
+  }
+}

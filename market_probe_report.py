@@ -18,10 +18,32 @@ def f(v: str | None) -> float:
     return float(v)
 
 
-def recommendation(quality: float, entry: float, exit_given_fill: float, ev_bps_per_quote: float, sample_quotes: int) -> str:
-    if sample_quotes < 150 or entry < 0.15:
+def recommendation(
+    quality: float,
+    entry: float,
+    exit_given_fill: float,
+    forced_taker_frac: float,
+    adverse_mean_bps: float,
+    ev_bps_per_quote: float,
+    sample_quotes: int,
+) -> str:
+    if (
+        sample_quotes < 150
+        or entry < 0.20
+        or exit_given_fill < 0.30
+        or forced_taker_frac > 0.70
+        or ev_bps_per_quote <= -60.0
+    ):
         return "ignore"
-    if quality >= 60 and entry >= 0.25 and exit_given_fill >= 0.45 and ev_bps_per_quote > 0:
+    if (
+        quality >= 60
+        and sample_quotes >= 1000
+        and entry >= 0.25
+        and exit_given_fill >= 0.55
+        and forced_taker_frac <= 0.45
+        and adverse_mean_bps <= 10.0
+        and ev_bps_per_quote > 0
+    ):
         return "candidate_for_tiny_live_money_probe"
     return "monitor"
 
@@ -48,6 +70,8 @@ def main() -> int:
         quality_score = f(q.get("quality_score"))
         entry = f(c.get("passive_entry_fill_inferred_freq"))
         exit_given_fill = f(c.get("passive_exit_opportunity_freq_given_fill"))
+        forced_taker_frac = f(c.get("forced_taker_exit_frac_given_fill"))
+        adverse_mean_bps = f((c.get("adverse_bps_after_touch_or_fill") or {}).get("mean"))
         ev = f(scenario.get("ev_bps_per_quote"))
         n = int(c.get("sample_quotes") or 0)
 
@@ -66,11 +90,20 @@ def main() -> int:
                 "ev_bps_per_quote": ev,
                 "maker_only_completion_prob": scenario.get("maker_only_completion_prob"),
                 "estimated_forced_taker_rate": scenario.get("estimated_forced_taker_rate"),
-                "recommendation": recommendation(quality_score, entry, exit_given_fill, ev, n),
+                "recommendation": recommendation(
+                    quality_score,
+                    entry,
+                    exit_given_fill,
+                    forced_taker_frac,
+                    adverse_mean_bps,
+                    ev,
+                    n,
+                ),
             }
         )
 
-    rows.sort(key=lambda x: (x["recommendation"], x["quality_score"], x["ev_bps_per_quote"]), reverse=True)
+    rank = {"candidate_for_tiny_live_money_probe": 2, "monitor": 1, "ignore": 0}
+    rows.sort(key=lambda x: (rank.get(x["recommendation"], -1), x["quality_score"], x["ev_bps_per_quote"]), reverse=True)
 
     fields = [
         "slug",

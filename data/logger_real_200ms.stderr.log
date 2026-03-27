@@ -1,0 +1,42 @@
+{"ts_utc": "2026-03-27T05:11:43.402+00:00", "event": "rollover_ws_closed", "reason": "rollover_or_restart"}
+{"ts_utc": "2026-03-27T05:11:43.413+00:00", "event": "market_rollover", "previous_slug": null, "new_slug": "btc-updown-5m-1774588200", "question": "Bitcoin Up or Down - March 27, 1:10AM-1:15AM ET", "yes_token": "46347366005331157003558200438796502493451305067093854825078719487217551793968", "no_token": "72217184666964983746156745248810316341263535506680696133886509744430587223490", "restart_due_to_dead_thread": true}
+Tracking: Bitcoin Up or Down - March 27, 1:10AM-1:15AM ET
+YES token: 46347366005331157003558200438796502493451305067093854825078719487217551793968
+NO  token: 72217184666964983746156745248810316341263535506680696133886509744430587223490
+{"ts_utc": "2026-03-27T05:11:43.416+00:00", "event": "ws_reconnect", "websocket": "poly", "reason": "new_market_or_thread_restart", "reconnect_count": 1}
+{"ts_utc": "2026-03-27T05:11:43.960+00:00", "event": "ws_open", "websocket": "btc", "topic": "crypto_prices_chainlink"}
+{"ts_utc": "2026-03-27T05:11:44.014+00:00", "event": "ws_open", "websocket": "poly", "slug": "btc-updown-5m-1774588200", "yes_token": "46347366005331157003558200438796502493451305067093854825078719487217551793968", "no_token": "72217184666964983746156745248810316341263535506680696133886509744430587223490"}
+Polymarket subscribed: btc-updown-5m-1774588200
+POLY WS closed: None None
+{"ts_utc": "2026-03-27T05:15:00.886+00:00", "event": "ws_disconnect", "websocket": "poly", "reason": "close:None:None", "disconnect_count": 1}
+{"ts_utc": "2026-03-27T05:15:01.156+00:00", "event": "rollover_ws_closed", "reason": "rollover_or_restart"}
+{"ts_utc": "2026-03-27T05:15:01.165+00:00", "event": "market_rollover", "previous_slug": "btc-updown-5m-1774588200", "new_slug": "btc-updown-5m-1774588500", "question": "Bitcoin Up or Down - March 27, 1:15AM-1:20AM ET", "yes_token": "108572947078237984518308842878658426182564410270550558627756600079019947178306", "no_token": "27617337559081899765609623452552035587184390522843663874963690310949979438067", "restart_due_to_dead_thread": false}
+Tracking: Bitcoin Up or Down - March 27, 1:15AM-1:20AM ET
+YES token: 108572947078237984518308842878658426182564410270550558627756600079019947178306
+NO  token: 27617337559081899765609623452552035587184390522843663874963690310949979438067
+{"ts_utc": "2026-03-27T05:15:01.166+00:00", "event": "ws_reconnect", "websocket": "poly", "reason": "new_market_or_thread_restart", "reconnect_count": 2}
+{"ts_utc": "2026-03-27T05:15:01.261+00:00", "event": "market_rows_written", "slug": "btc-updown-5m-1774588200", "rows": 981}
+{"ts_utc": "2026-03-27T05:15:01.819+00:00", "event": "ws_open", "websocket": "poly", "slug": "btc-updown-5m-1774588500", "yes_token": "108572947078237984518308842878658426182564410270550558627756600079019947178306", "no_token": "27617337559081899765609623452552035587184390522843663874963690310949979438067"}
+Polymarket subscribed: btc-updown-5m-1774588500
+POLY WS closed: None None
+{"ts_utc": "2026-03-27T05:20:00.667+00:00", "event": "ws_disconnect", "websocket": "poly", "reason": "close:None:None", "disconnect_count": 2}
+{"ts_utc": "2026-03-27T05:20:00.973+00:00", "event": "rollover_ws_closed", "reason": "rollover_or_restart"}
+{"ts_utc": "2026-03-27T05:20:00.983+00:00", "event": "market_rollover", "previous_slug": "btc-updown-5m-1774588500", "new_slug": "btc-updown-5m-1774588800", "question": "Bitcoin Up or Down - March 27, 1:20AM-1:25AM ET", "yes_token": "79865446837274514453519045822973892411700871382642710466538308470443840255894", "no_token": "46678226946439457403803983980474945627330612062131650935432881098493408573264", "restart_due_to_dead_thread": false}
+Tracking: Bitcoin Up or Down - March 27, 1:20AM-1:25AM ET
+YES token: 79865446837274514453519045822973892411700871382642710466538308470443840255894
+NO  token: 46678226946439457403803983980474945627330612062131650935432881098493408573264
+{"ts_utc": "2026-03-27T05:20:00.985+00:00", "event": "ws_reconnect", "websocket": "poly", "reason": "new_market_or_thread_restart", "reconnect_count": 3}
+{"ts_utc": "2026-03-27T05:20:01.062+00:00", "event": "market_rows_written", "slug": "btc-updown-5m-1774588500", "rows": 1494}
+{"ts_utc": "2026-03-27T05:20:01.607+00:00", "event": "ws_open", "websocket": "poly", "slug": "btc-updown-5m-1774588800", "yes_token": "79865446837274514453519045822973892411700871382642710466538308470443840255894", "no_token": "46678226946439457403803983980474945627330612062131650935432881098493408573264"}
+Polymarket subscribed: btc-updown-5m-1774588800
+POLY WS closed: None None
+{"ts_utc": "2026-03-27T05:25:00.512+00:00", "event": "ws_disconnect", "websocket": "poly", "reason": "close:None:None", "disconnect_count": 3}
+{"ts_utc": "2026-03-27T05:25:00.760+00:00", "event": "rollover_ws_closed", "reason": "rollover_or_restart"}
+{"ts_utc": "2026-03-27T05:25:00.770+00:00", "event": "market_rollover", "previous_slug": "btc-updown-5m-1774588800", "new_slug": "btc-updown-5m-1774589100", "question": "Bitcoin Up or Down - March 27, 1:25AM-1:30AM ET", "yes_token": "25456833461583749970389920592022740765111548055699998353707252409887738172053", "no_token": "40930452328873116184357515421087544420135565434430949854043068454175026267122", "restart_due_to_dead_thread": false}
+Tracking: Bitcoin Up or Down - March 27, 1:25AM-1:30AM ET
+YES token: 25456833461583749970389920592022740765111548055699998353707252409887738172053
+NO  token: 40930452328873116184357515421087544420135565434430949854043068454175026267122
+{"ts_utc": "2026-03-27T05:25:00.770+00:00", "event": "ws_reconnect", "websocket": "poly", "reason": "new_market_or_thread_restart", "reconnect_count": 4}
+{"ts_utc": "2026-03-27T05:25:00.874+00:00", "event": "market_rows_written", "slug": "btc-updown-5m-1774588800", "rows": 1494}
+{"ts_utc": "2026-03-27T05:25:01.435+00:00", "event": "ws_open", "websocket": "poly", "slug": "btc-updown-5m-1774589100", "yes_token": "25456833461583749970389920592022740765111548055699998353707252409887738172053", "no_token": "40930452328873116184357515421087544420135565434430949854043068454175026267122"}
+Polymarket subscribed: btc-updown-5m-1774589100
