@@ -4,6 +4,7 @@ This repository is focused on **market data capture stability** and **execution 
 
 ## Active scripts and purpose
 - `polymarket_snapshot_logger.py` - rolling BTC 5-minute Polymarket snapshot logger with diagnostics and rollover support.
+- `live_paper_trader.py` - live BTC 5-minute paper-trading runner with terminal dashboard, rollover handling, CSV event/trade logs, and shutdown summaries.
 - `live_test_harness.py` - safe-by-default dry-run execution telemetry harness. Derives touch, inferred-fill, and exit-opportunity telemetry from snapshots.
 - `telemetry_calibrated_backtest.py` - calibration and tiered backtest estimates (optimistic / measured / conservative), including per-market calibration summaries.
 - `market_quality_score.py` - per-market quality scoring/ranking to decide where execution testing is worthwhile.
@@ -85,6 +86,51 @@ Combined probe recommendation report:
   --out-json data/market_probe_report_real.json
 ```
 
+## Live paper trader
+`live_paper_trader.py` reuses the same BTC reference feed, Polymarket websocket subscription, and 5-minute rollover handling as the snapshot logger, but it keeps the market state in memory so a paper-only strategy can react in real time.
+
+What it does:
+- Tracks the active BTC 5-minute market, YES/NO prices, BTC reference move, recent momentum, and simple order-flow imbalance.
+- Runs a conservative one-position-at-a-time paper strategy that can trade long `YES` or long `NO`.
+- Supports `early-exit` mode and `expiry` mode.
+- Refreshes a curses-free terminal dashboard in place.
+- Writes `paper_trades.csv`, `paper_events.csv`, `paper_equity.csv`, `session_summary.json`, and `session_summary.csv` into a timestamped run directory.
+
+48-hour live paper run:
+```powershell
+.\.venv\Scripts\python.exe live_paper_trader.py `
+  --paper-bankroll 1000 `
+  --stake 25 `
+  --max-position-notional 25 `
+  --fee-bps 10 `
+  --slippage-bps 15 `
+  --fill-style mid `
+  --mode early-exit `
+  --min-edge 0.08 `
+  --max-hold-s 90 `
+  --near-expiry-window-s 45 `
+  --btc-momentum-window-s 30 `
+  --flow-window-s 15 `
+  --heartbeat-timeout-s 5 `
+  --refresh-ms 250 `
+  --log-dir data/paper_runs
+```
+
+Approximate assumptions:
+- Default fills are paper fills only. `mid` mode uses mid plus a slippage penalty on entry and mid minus a slippage penalty on exit.
+- `taker` mode leans on ask-in / bid-out. `maker` mode is a more optimistic bid-in / ask-out paper assumption.
+- Expiry settlement is inferred from captured BTC reference prices around expiry, not official Polymarket resolution messages.
+- Results are for strategy instrumentation only and are not evidence of live executable profitability.
+
+Local replay smoke path:
+```powershell
+.\.venv\Scripts\python.exe live_paper_trader.py `
+  --replay-csv data/snapshots_real_200ms.csv `
+  --replay-speedup 200 `
+  --mode early-exit `
+  --log-dir data/paper_replay_runs
+```
+
 ## What We Learned
 - Real runtime validation on 2026-03-27 UTC kept the `0.2s` logger stable across four BTC 5-minute markets. Realized cadence was 200.6ms mean / 210ms p95, and the only gaps above 0.5s were rollover gaps.
 - Rollover handling and reconnect behavior matched expectations. The Polymarket websocket closed once per market boundary and re-opened cleanly; no BTC websocket reconnects were observed. Market-message stale-period fraction above 1s was 0.0 in the real capture.
@@ -93,5 +139,6 @@ Combined probe recommendation report:
 
 ## Safety constraints
 - Dry-run is default and live execution is intentionally disabled in harness code.
+- `live_paper_trader.py` is paper trading only. It does not submit orders, sign transactions, use wallets, or accept private keys.
 - No wallet secrets required for any command in this repository.
 - Never assume profitability from backtests; treat telemetry-calibrated outputs as planning inputs.
