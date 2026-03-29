@@ -1,5 +1,14 @@
 .idea/
 .venv/
+__pycache__/
+*.pyc
 snapshots.csv
-data/*smoke*
+live_test_diagnostics.csv
 data/*.stdout.log
+data/*.stderr.log
+data/*_48h*
+data/paper_runs/
+data/paper_replay_runs/
+data/paper_smoke*/
+data/snapshots_smoke_200ms.csv
+data/snapshots_UFC.csv

@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import signal
 import sys
 import time
@@ -122,8 +123,8 @@ class StrategyEngine:
         if seconds_to_expiry is None or seconds_to_expiry <= 0:
             return StrategyDecision("wait", None, "FLAT", "market_expired", None, None, 0.0)
 
-        if position is None and seconds_to_expiry <= self.near_expiry_window_s:
-            return StrategyDecision("wait", None, "FLAT", "near_expiry_entry_block", None, None, 0.0)
+        if position is None and seconds_to_expiry > self.near_expiry_window_s:
+            return StrategyDecision("wait", None, "FLAT", "outside_near_expiry_window", None, None, 0.0)
 
         if position is None and market_entries >= self.max_entries_per_market:
             return StrategyDecision("wait", None, "FLAT", "market_entry_limit", None, None, 0.0)
@@ -419,9 +420,20 @@ class TradeLogger:
         self.trade_path = run_dir / "paper_trades.csv"
         self.event_path = run_dir / "paper_events.csv"
         self.equity_path = run_dir / "paper_equity.csv"
+        self.flush_interval_s = 2.0
+        now_monotonic = time.monotonic()
+        self._trade_last_flush = now_monotonic
+        self._event_last_flush = now_monotonic
+        self._equity_last_flush = now_monotonic
+
+        self._trade_handle, self._trade_writer = self._open_csv(self.trade_path, self.trade_fields)
+        self._event_handle, self._event_writer = self._open_csv(self.event_path, self.event_fields)
+        self._equity_handle, self._equity_writer = self._open_csv(self.equity_path, self.equity_fields)
 
     def log_trade(self, row: dict[str, Any]) -> None:
         self.trade_rows.append(row)
+        self._trade_writer.writerow(row)
+        self._flush_handle(self._trade_handle, "_trade_last_flush", force=True, fsync=True)
 
     def log_event(
         self,
@@ -432,48 +444,65 @@ class TradeLogger:
         reason: Optional[str] = None,
         details: Optional[dict[str, Any]] = None,
     ) -> None:
-        self.event_rows.append(
-            {
-                "ts_utc": now_iso(),
-                "event": event,
-                "market_id": market_slug or "",
-                "market_slug": market_slug or "",
-                "side": side or "",
-                "signal": signal or "",
-                "reason": reason or "",
-                "details_json": json.dumps(details or {}, sort_keys=True),
-            }
-        )
+        row = {
+            "ts_utc": now_iso(),
+            "event": event,
+            "market_id": market_slug or "",
+            "market_slug": market_slug or "",
+            "side": side or "",
+            "signal": signal or "",
+            "reason": reason or "",
+            "details_json": json.dumps(details or {}, sort_keys=True),
+        }
+        self.event_rows.append(row)
+        self._event_writer.writerow(row)
+        self._flush_handle(self._event_handle, "_event_last_flush")
 
     def log_equity(self, snapshot: Optional[dict[str, Any]], broker: PaperBroker, marks: dict[str, Optional[float]]) -> None:
         position = broker.position
-        self.equity_rows.append(
-            {
-                "ts_utc": str((snapshot or {}).get("ts_utc") or now_iso()),
-                "market_slug": str((snapshot or {}).get("slug") or ""),
-                "position_side": position.side if position else "",
-                "entry_price": position.entry_price if position else None,
-                "mark_price_mid": marks.get("mark_price_mid"),
-                "mark_price_exit": marks.get("mark_price_exit"),
-                "unrealized_mid": marks.get("unrealized_mid"),
-                "unrealized_exit": marks.get("unrealized_exit"),
-                "realized_pnl": broker.realized_pnl,
-                "running_equity": marks.get("running_equity"),
-                "max_drawdown": broker.max_drawdown,
-            }
-        )
+        row = {
+            "ts_utc": str((snapshot or {}).get("ts_utc") or now_iso()),
+            "market_slug": str((snapshot or {}).get("slug") or ""),
+            "position_side": position.side if position else "",
+            "entry_price": position.entry_price if position else None,
+            "mark_price_mid": marks.get("mark_price_mid"),
+            "mark_price_exit": marks.get("mark_price_exit"),
+            "unrealized_mid": marks.get("unrealized_mid"),
+            "unrealized_exit": marks.get("unrealized_exit"),
+            "realized_pnl": broker.realized_pnl,
+            "running_equity": marks.get("running_equity"),
+            "max_drawdown": broker.max_drawdown,
+        }
+        self.equity_rows.append(row)
+        self._equity_writer.writerow(row)
+        self._flush_handle(self._equity_handle, "_equity_last_flush")
 
-    def flush(self) -> None:
-        self._write_csv(self.trade_path, self.trade_fields, self.trade_rows)
-        self._write_csv(self.event_path, self.event_fields, self.event_rows)
-        self._write_csv(self.equity_path, self.equity_fields, self.equity_rows)
+    def flush(self, force_fsync: bool = False) -> None:
+        self._flush_handle(self._trade_handle, "_trade_last_flush", force=True, fsync=force_fsync)
+        self._flush_handle(self._event_handle, "_event_last_flush", force=True, fsync=force_fsync)
+        self._flush_handle(self._equity_handle, "_equity_last_flush", force=True, fsync=force_fsync)
 
-    def _write_csv(self, path: Path, fields: list[str], rows: list[dict[str, Any]]) -> None:
-        with open(path, "w", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=fields)
-            writer.writeheader()
-            for row in rows:
-                writer.writerow(row)
+    def close(self) -> None:
+        self.flush(force_fsync=True)
+        for handle in (self._trade_handle, self._event_handle, self._equity_handle):
+            handle.close()
+
+    def _open_csv(self, path: Path, fields: list[str]) -> tuple[Any, csv.DictWriter]:
+        handle = open(path, "w", newline="", encoding="utf-8", buffering=1)
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        handle.flush()
+        return handle, writer
+
+    def _flush_handle(self, handle: Any, last_flush_attr: str, force: bool = False, fsync: bool = False) -> None:
+        now_monotonic = time.monotonic()
+        last_flush = getattr(self, last_flush_attr)
+        if not force and (now_monotonic - last_flush) < self.flush_interval_s:
+            return
+        handle.flush()
+        if fsync:
+            os.fsync(handle.fileno())
+        setattr(self, last_flush_attr, now_monotonic)
 
 
 class TerminalDashboard:
@@ -733,17 +762,22 @@ def build_summary(
 def write_summary_files(run_dir: Path, summary: dict[str, Any]) -> None:
     summary_json = run_dir / "session_summary.json"
     summary_csv = run_dir / "session_summary.csv"
-    with open(summary_json, "w", encoding="utf-8") as handle:
+    with open(summary_json, "w", encoding="utf-8", buffering=1) as handle:
         json.dump(summary, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
 
     csv_row = dict(summary)
     csv_row["per_market"] = json.dumps(summary["per_market"], sort_keys=True)
     csv_row["notes"] = " | ".join(summary["notes"])
     fieldnames = list(csv_row.keys())
-    with open(summary_csv, "w", newline="", encoding="utf-8") as handle:
+    with open(summary_csv, "w", newline="", encoding="utf-8", buffering=1) as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerow(csv_row)
+        handle.flush()
+        os.fsync(handle.fileno())
 
 
 def process_snapshot(
@@ -930,17 +964,22 @@ def main() -> int:
     args = parser.parse_args()
     run_dir = build_run_dir(args.log_dir)
     started_at = time.time()
+    logger: Optional[TradeLogger] = None
 
-    if args.replay_csv:
-        broker, logger = run_replay(args, run_dir)
-    else:
-        broker, logger = run_live(args, run_dir)
+    try:
+        if args.replay_csv:
+            broker, logger = run_replay(args, run_dir)
+        else:
+            broker, logger = run_live(args, run_dir)
 
-    logger.flush()
-    finished_at = time.time()
-    summary = build_summary(args, broker, logger, run_dir, started_at, finished_at)
-    write_summary_files(run_dir, summary)
-    return 0
+        logger.flush(force_fsync=True)
+        finished_at = time.time()
+        summary = build_summary(args, broker, logger, run_dir, started_at, finished_at)
+        write_summary_files(run_dir, summary)
+        return 0
+    finally:
+        if logger is not None:
+            logger.close()
 
 
 if __name__ == "__main__":
